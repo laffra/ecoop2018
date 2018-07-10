@@ -1,0 +1,401 @@
+main(ConfApp)
+
+component Event {
+  props {
+    event: {
+      when: number,
+      start: string,
+      end: string,
+      track: string,
+      summary: string,
+      uid: string,
+      description: string,
+      location: string,
+    }
+  }
+  view {
+    <View border={color:"grey", width:1} margin=5 padding=5>
+      <Label textStyle="metaNormal" text=props.event.start/>
+      <Label textStyle="h3BookTertiary" text=props.event.track/>
+      <Label textStyle="headlineNormal" text=props.event.location/>
+      <Label textStyle="h2BookSecondary" text=props.event.summary/>
+      <Label text=props.event.description/>
+    </View>
+  }
+}
+
+component ConfApp {
+  view {
+    <View flexDirection="row">
+      if (state.last_button === state.TS_SUN) {
+        <Button text="S" onPress=actions.sun margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="S" onPress=actions.sun margin=5/>
+      }
+      if (state.last_button === state.TS_MON) {
+        <Button text="M" onPress=actions.mon margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="M" onPress=actions.mon margin=5/>
+      }
+      if (state.last_button === state.TS_TUE) {
+        <Button text="T" onPress=actions.tue margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="T" onPress=actions.tue margin=5/>
+      }
+      if (state.last_button === state.TS_WED) {
+        <Button text="W" onPress=actions.wed margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="W" onPress=actions.wed margin=5/>
+      }
+      if (state.last_button === state.TS_THU) {
+        <Button text="T" onPress=actions.thu margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="T" onPress=actions.thu margin=5/>
+      }
+      if (state.last_button === state.TS_FRI) {
+        <Button text="F" onPress=actions.fri margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="F" onPress=actions.fri margin=5/>
+      }
+      if (state.last_button === state.TS_SAT) {
+        <Button text="S" onPress=actions.sat margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="S" onPress=actions.sat margin=5/>
+      }
+      if (state.last_button === state.TS_NOW) {
+        <Button text="⏱" onPress=actions.now margin=5 backgroundColor="maroon"/>
+      } else {
+        <Button text="⏱" onPress=actions.now margin=5/>
+      }
+    </View>
+    <View flexDirection="row">
+      <TextInput placeholder="Filter for matching string" onChange=actions.search width=500 margin=5/>
+    </View>
+    <ScrollView flexDirection="column">
+      map(event of state.events) {
+        <Event event=event/>
+      }
+    </ScrollView>
+  }
+
+  actions {
+    sun() {
+      return { last_button: this.state.TS_SUN, ts_start: this.state.TS_SUN, events: this.filterEvents(this.state.TS_SUN, "") }
+    }
+    mon() {
+      return { last_button: this.state.TS_MON, ts_start: this.state.TS_MON, events: this.filterEvents(this.state.TS_MON, "") }
+    }
+    tue() {
+      return { last_button: this.state.TS_TUE, ts_start: this.state.TS_TUE, events: this.filterEvents(this.state.TS_TUE, "") }
+    }
+    wed() {
+      return { last_button: this.state.TS_WED, ts_start: this.state.TS_WED, events: this.filterEvents(this.state.TS_WED, "") }
+    }
+    thu() {
+      return { last_button: this.state.TS_THU, ts_start: this.state.TS_THU, events: this.filterEvents(this.state.TS_THU, "") }
+    }
+    fri() {
+      return { last_button: this.state.TS_FRI, ts_start: this.state.TS_FRI, events: this.filterEvents(this.state.TS_FRI, "") }
+    }
+    sat() {
+      return { last_button: this.state.TS_SAT, ts_start: this.state.TS_SAT, events: this.filterEvents(this.state.TS_SAT, "") }
+    }
+    now() {
+      const now = new Date().getTime();
+      return { last_button: now, ts_start: now, events: this.filterEvents(new Date().getTime(), "") }
+    }
+    search(filter: string) {
+      return { filter: filter, events: this.filterEvents(this.state.ts_start, filter) }
+    }
+  }
+
+  filterEvents(ts_start: number, filter: string): Array<{
+      when: number,
+      start: string,
+      end: string,
+      track: string,
+      summary: string,
+      uid: string,
+      description: string,
+      location: string,
+    }> {
+    return this.state.all_events.filter(event => {
+      filter = filter || this.state.filter;
+      if (filter && !this.match(event.summary, filter) && !this.match(event.description, filter) && !this.match(event.track, filter)) return false;
+      return event.when >= ts_start;
+    });
+  }
+
+  match(s: string, filter: string): boolean {
+    return s.toLowerCase().indexOf(filter.toLowerCase()) != -1;
+  }
+
+  state {
+    TS_SUN: number = 1531638000000
+    TS_MON: number = 1531724400000
+    TS_TUE: number = 1531810800000
+    TS_WED: number = 1531897200000
+    TS_THU: number = 1531983600000
+    TS_FRI: number = 1532070000000
+    TS_SAT: number = 1532156400000
+    TS_END: number = 1532242800000
+    TS_NOW: number = -1
+
+    ts_start: number = 1531638000000
+
+    last_button: number = 0
+
+    filter: string = ""
+
+    all_events: Array<{
+      when: number,
+      start: string,
+      end: string,
+      track: string,
+      summary: string,
+      uid: string,
+      description: string,
+      location: string,
+    }> = [{
+      //
+      // This schedule is incomplete and should really be loaded from a service. Downloaded from
+      // https://conf.researchr.org/program/ecoop-issta-2018/program-ecoop-issta-2018
+      //
+      when: 1531666800000,
+      start: "Sun Jul 15 - 17:00",
+      end: "Sun Jul 15 - 20:00",
+      uid: "3e267a02-6456-474d-a6bd-70bdfc08d12c@conf.researchr.org",
+      track: "ECOOP and ISSTA Summer School",
+      summary: "35 years of fun with functional programming - Simon Peyton Jones",
+      description: "",
+      location: "Summer School Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531725300000,
+      start: "Mon Jul 16 - 09:15",
+      end: "Mon Jul 16 - 09:30",
+      uid: "41e9c0e8-3528-4c42-9647-29ccf300efe8@conf.researchr.org",
+      track: "CurryOn 2018 CurryOn Keynotes",
+      summary: "Opening Remarks - Jan Vitek\, Heather Miller",
+      description: "",
+      location: "CurryOn Keynote Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531726200000,
+      start: "Mon Jul 16 - 09:30",
+      end: "Mon Jul 16 - 10:20",
+      uid: "d141e512-7429-4951-87f7-6c1fafcb4215@conf.researchr.org",
+      track: "CurryOn 2018 CurryOn Keynotes",
+      summary: "WebAssembly\, Past\, Present\, and Future - Ben L. Titzer\, Andreas Rossberg",
+      description: "WebAssembly is a new\, portable\, low-level bytecode format for the web. It is the result of a collaboration of a large constellation of players from many companies and academia and opens a wide world of new possibilities for applications on the web. This talk will cover the history of WebAssembly from two its principal inventors and offer a (hopefully) fascinating view into the makings of a major web platform change. We’ll offer our personal perspectives and struggles\, as well as cover today’s developments in WebAssembly and our hope for its future.",
+      location: "CurryOn Keynote Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531726200000,
+      start: "Mon Jul 16 - 09:30",
+      end: "Mon Jul 16 - 10:30",
+      uid: "09b66fdb-2bf0-47a8-b3c9-4a7cc2d77738@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Keynotes",
+      summary: "Solver-Aided Programming for All - Emina Torlak",
+      description: "Solver-aided tools have automated the verification and synthesis of practical programs in many domains\, from high-performance computing to executable biology. These tools work by reducing verification and synthesis tasks to satisfiability queries\, which involves compiling programs to logical constraints. Developing an effective symbolic compiler is challenging\, however\, and until recently\, it took years of expert work to create a solver-aided tool for a new domain. \nIn this talk\, I will present Rosette\, a programming language for rapid creation of solver-aided tools. With Rosette\, building these tools for a new domain is a matter of implementing a language for programming in that domain. Once you implement your domain-specific language (DSL)\, by writing a library or an interpreter\, you get a symbolic compiler and the tools for free. This is made possible by Rosette’s symbolic virtual machine\, which can translate both a DSL implementation and programs in that DSL to efficient constraints. Since its first public release in 2014\, Rosette has enabled a wide range of programmers\, from professional developers to high school students\, to quickly create practical solver-aided tools for a variety of domains. Example applications include verifying radiation therapy software\, generating tests for service-oriented architectures\, and synthesizing custom tutoring rules for K-12 algebra. This talk will provide a brief introduction to Rosette\, describe a few recent applications\, and outline key directions for future work.",
+      location: "ISSTA Keynote Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531731600000,
+      start: "Mon Jul 16 - 11:00",
+      end: "Mon Jul 16 - 11:45",
+      uid: "69c15ddd-f5ba-4c40-9d98-2f5da54e1067@conf.researchr.org",
+      track: "CurryOn 2018 CurryOn Talks",
+      summary: "Live\, On Ice! - Sztefan Edwards",
+      description: "Let’s see how far we can push the chess timer format",
+      location: "Curry On Room 1 - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531731600000,
+      start: "Mon Jul 16 - 11:00",
+      end: "Mon Jul 16 - 11:20",
+      uid: "067b2392-d5be-4729-9c73-82a2a86add60@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Technical Papers",
+      summary: "Lightweight Verification of Array Indexing - Martin Kellogg\, Vlastimil Dort\, Suzanne Millstein\, Michael D. Ernst",
+      description: "In languages like C\, out-of-bounds array accesses lead to security vulnerabilities and crashes. Even in managed languages like Java\, which check array bounds at run time\, out-of-bounds accesses cause exceptions that terminate the program. \nWe present a lightweight type system that certifies\, at compile time\, that array accesses in the program will be in-bounds. The type system consists of several cooperating hierarchies of dependent types\, specialized to the domain of array bounds-checking. Programmers can write type annotations at procedure boundaries\, allowing modular verification at a cost that scales linearly with program size. \nWe implemented our type system for Java in a tool we call Charles. We evaluated Charles on over 100\,000 lines of open-source code and discovered array access errors even in well-tested\, industrial projects such as Google Guava.",
+      location: "ISSTA Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531731600000,
+      start: "Mon Jul 16 - 11:00",
+      end: "Mon Jul 16 - 11:45",
+      uid: "ed7f03f4-2916-47ec-b269-827051bc22de@conf.researchr.org",
+      track: "CurryOn 2018 CurryOn Talks",
+      summary: "Adding kind-polymorphism to the Scala programming language - Miles Sabin",
+      description: "In Scala\, the data type generic programming library shapeless is the tool that people reach for when they have problems involving abstraction over data types of different shapes and sizes. But suppose we wanted to support this sort of generic programming directly in the language? What sort of primitive mechanisms would we choose? In this talk I will argue that kind-polymorphism\, the ability to abstract over type constructors of any arity\, is one we should give serious consideration to. I will demonstrate a prototype implementation in the Typelevel Scala compiler and show how it can be used to dramatically simplify generic programming in Scala.",
+      location: "Curry On Room 3 - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531810800000,
+      start: "Tue Jul 17 - 09:00",
+      end: "Tue Jul 17 - 09:20",
+      uid: "f7b54373-e6ca-4b51-86a4-25cf8f80c303@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Technical Papers",
+      summary: "Automatically Translating Bug Reports into Test Cases for Mobile Apps - Mattia Fazzini\, Martin Prammer\, Marcelo d'Amorim\, Alessandro Orso",
+      description: "When users experience a software failure\, they have the option of submitting a bug report and provide information about the failure and how it happened. If the bug report contains enough information\, developers can then try to recreate the issue and investigate it\, so as to eliminate its causes. Unfortunately\, the number of bug reports filed by users is typically large\, and the tasks of analyzing bug reports and reproducing the issues described therein can be extremely time consuming. To help make this process more efficient\, in this paper we propose Yakusu\, a technique that uses a combination of program analysis and natural language processing techniques to generate executable test cases from bug reports. We implemented Yakusu for Android apps and performed an empirical evaluation on a set of over 60 real bug reports for different real-world apps. Overall\, our technique was successful in 59.7% of the cases\, which means that for a majority of the bug reports\, developers would not have to study the report to reproduce the issue described\, as they could simply use the test cases automatically generated by Yakusu. Furthermore\, in many of the remaining cases\, Yakusu was unsuccessful due to limitations that are not inherent in the approach and that can be addressed in future work.",
+      location: "ISSTA Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531811700000,
+      start: "Tue Jul 17 - 09:15",
+      end: "Tue Jul 17 - 10:20",
+      uid: "bc8b8366-71cc-4d98-af72-1160132ba79d@conf.researchr.org",
+      track: "CurryOn 2018 CurryOn Keynotes",
+      summary: "Opening Remarks - Jan Vitek\, Heather Miller",
+      description: "",
+      location: "CurryOn Keynote Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531812000000,
+      start: "Tue Jul 17 - 09:20",
+      end: "Tue Jul 17 - 09:40",
+      uid: "03585e04-3925-42e2-a217-1e1c0def308b@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Technical Papers",
+      summary: "CiD",
+      description: "The Android Application Programming Interface provides the necessary building blocks for app developers to harness the functionalities of the Android devices\, including for interacting with services and accessing hardware. This API thus evolves rapidly to meet new requirements for security\, performance and advanced features\, creating a race for developers to update apps. Unfortunately\, given the extent of the API and the lack of automated alerts on important changes\, Android apps are suffered from API-related compatibility issues. These issues can manifest themselves as runtime crashes creating a poor user experience. We propose in this paper an automated approach named \tool{} for systematically modelling the lifecycle of the Android APIs and analysing app bytecode to flag usages that can lead to potential compatibility issues. We demonstrate the usefulness of CiD by helping developers repair their apps\, and we validate that our tool outperforms the state-of-the-art on benchmark apps that take into account several challenges for automatic detection.",
+      location: "ISSTA Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531813200000,
+      start: "Tue Jul 17 - 09:40",
+      end: "Tue Jul 17 - 10:00",
+      uid: "8f8812ee-a8fe-441a-9e17-f084b89e1a57@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Technical Papers",
+      summary: "Test Migration for Efficient Large-Scale Assessment of Mobile App Coding Assignments - Farnaz Behrang\, Alessandro Orso",
+      description: "In recent years\, there has been a growing interest in making education widely accessible using Internet technologies. Whether it is Massive Open Online Courses (MOOCs) or simply college courses offered to a large student population using an online platform\, both education-focused companies and universities\, often in collaboration with one another\, have been investing massively in online education. The fact that hundreds\, and more often thousands\, of students take these online courses raises scalability challenges in assessing student assignments. In this paper\, in particular\, we present a technique (GUITestMigrator) that addresses the challenge of assessing mobile app coding assignments. Given a set of apps that implement the same specification\, but can have completely different user interfaces\, instructors normally have to manually run and check each app to make sure it behaves correctly and according to the specification. GUITestMigrator\, conversely\, allows for developing tests for one of these apps and automatically migrating these tests to the other apps\, thus dramatically reducing the burden on the instructor. We implemented GUITestMigrator for Android apps and evaluated it on three sets of apps developed over three different semesters by students of an online graduate-level software engineering course. Our initial results show that our approach is promising and motivates further research in this direction. The paper also discusses possible applications of this approach for test evolution and test migration for real-world apps.",
+      location: "ISSTA Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531814400000,
+      start: "Tue Jul 17 - 10:00",
+      end: "Tue Jul 17 - 10:20",
+      uid: "44413bda-8ce9-4d83-aeb6-734fa042753c@conf.researchr.org",
+      track: "ISSTA 2018 ISSTA Technical Papers",
+      summary: "Analyzing the Analyzers",
+      description: "Numerous static analysis techniques have recently been proposed for identifying information flows in mobile applications. These techniques are compared to each other\, usually on a set of syntactic benchmarks. Yet\, configurations used for such comparisons are rarely described. Our experience also shows that tools are often compared under different setup\, rendering the comparisons irreproducible and largely inaccurate. In this paper\, we provide a large\, controlled\, and independent comparison of the three most prominent static analysis tools",
+      location: "ISSTA Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531897800000,
+      start: "Wed Jul 18 - 09:10",
+      end: "Wed Jul 18 - 09:40",
+      uid: "fa8ca7fd-a4c6-457a-ac53-2bd7c9049c39@conf.researchr.org",
+      track: "BenchWork 2018",
+      summary: "Real World Benchmarks for JavaScript - Toon Verwaest\, Camilo Bruni",
+      description: "V8 is one of the most popular JavaScript VMs. Benchmarks play an essential role in V8’s development cycle. V8 originally focused on peak-performance benchmarks to drive VM development forward. Over time the focus broadened and V8 is fully integrated in a complex benchmarking environment which reach from unittest-like microbenchmarks to full-system benchmarks within the Chrome browser. The results of those benchmarks are made accessible to VM developers by isolating sources of noise and partitioning the time spent per VM component. As an indirect result of these benchmarks we achieved a 20% improvement on the Speedometer benchmark\, a good proxy for real-world JavaScript usage.",
+      location: "BenchWork Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531899600000,
+      start: "Wed Jul 18 - 09:40",
+      end: "Wed Jul 18 - 10:00",
+      uid: "760d0313-0f78-4ac4-b886-d1d996ad86cb@conf.researchr.org",
+      track: "BenchWork 2018",
+      summary: "In Search of Accurate Benchmarking - Edd Barrett\, Sarah Mount\, Laurence Tratt",
+      description: "In 2017\, the Software Development Team at King’s College London performed a benchmarking experiment to compare the warmup time and peak performance of modern programming language Virtual Machines (VMs). The experiment was intended to be the most rigorous to date. Our results were both surprising and disappointing. Not only did few modern VMs achieve a steady state of peak performance when running well known benchmarks\, but some even slowed down over time. \nThis talk focuses not on the results of our experiment\, but on our experiences of developing the “Krun” benchmarking system and the statistical analyses we used to process our data. The talk will discuss the difficulties we encountered in eliminating confounding variables and will show you how to present performance results in the absence of steady states. \nWhilst Krun enabled us to collect robust and accurate results for our experiment\, it tends towards being overkill. Ideally we’d like to build a cut-down version of Krun\, but this raises the question of “which of Krun’s features make the most difference to benchmarking quality?”.",
+      location: "BenchWork Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531900800000,
+      start: "Wed Jul 18 - 10:00",
+      end: "Wed Jul 18 - 10:30",
+      uid: "56db2d8c-2ac2-4c55-8111-865c005067de@conf.researchr.org",
+      track: "BenchWork 2018",
+      summary: "AndroZoo",
+      description: "In this talk\, we describe the motivations behind the creation of AndroZoo\, a collection of 5+ millions of Android Application\, and provide concrete examples of the problems implied by the absence of a widely available and widely used benchmark dataset. Next\, we come back on some of the engineering challenges linked with the creation of a large scale dataset (70+TB)\, and highlight the organisational challenges of maintaining a dataset in the long run in an academic setting. We also quickly present our approach to try to stay as clear as possible of the legal difficulties of distributing non-Free software. Finally\, we discuss the adoption of AndroZoo and the fulfillment of our original goals\, and we address what we believe are the main limiting factors with regards to AndroZoo’s adoption.",
+      location: "BenchWork Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1531989000000,
+      start: "Thu Jul 19 - 10:30",
+      end: "Thu Jul 19 - 11:00",
+      uid: "55c20572-ecf9-4dc0-b9dc-9b47e48c1f1e@conf.researchr.org",
+      track: "ECOOP 2018 Catering",
+      summary: "Coffee Break",
+      description: "",
+      location: "Coffee Break Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532095800000,
+      start: "Fri Jul 20 - 16:10",
+      end: "Fri Jul 20 - 16:35",
+      uid: "537921d6-8eca-4b17-ae1c-60ad73c847b9@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "FHJ",
+      description: "Multiple inheritance is a valuable feature for Object-Oriented Programming. However\, it is also tricky to get right\, as illustrated by the extensive literature on the topic. A key issue is the ambiguity arising from inheriting multiple parents\, which can have conflicting methods. Numerous existing work provides solutions for conflicts which arise from diamond inheritance",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532097300000,
+      start: "Fri Jul 20 - 16:35",
+      end: "Fri Jul 20 - 17:00",
+      uid: "1fb1cd7b-d94a-4837-b7d5-f464789679cd@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "Modeling infinite behaviour by corules - Davide Ancona\, Francesco Dagnino\, Elena Zucca",
+      description: "Generalized inference systems have been recently introduced\, and used\, among other applications\, to define semantic judgments which uniformly model terminating computations and divergence. We show that the approach can be successfully extended to more sophisticated notions of infinite behaviour\, that is\, to express that a diverging computation produces some possibly infinite result. This also provides a motivation to smoothly extend the theory of generalized inference systems to include\, besides coaxioms\, also corules\, a more general notion for which significant examples were missing until now. We first illustrate the approach on a lambda-calculus with output effects\, for which we also provide an alternative semantics based on standard notions\, and a complete proof of the equivalence of the two semantics. Then\, we consider a more involved example\, that is\, an imperative Java-like language with I/O primitives.",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532098800000,
+      start: "Fri Jul 20 - 17:00",
+      end: "Fri Jul 20 - 17:25",
+      uid: "e623a4d7-9446-4eab-8740-2f5eb1eddcca@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "The Essence of Nested Composition - Xuan Bi\, Bruno C. d. S. Oliveira\, Tom Schrijvers",
+      description: "Calculi with disjoint intersection types support an introduction form for intersections called the merge operator\, while retaining a coherent semantics. Disjoint intersections types have great potential to serve as a foundation for powerful\, flexible and yet type-safe and easy to reason OO languages. This paper shows how to significantly increase the expressive power of disjoint intersection types by adding support for nested subtyping and composition\, which enables simple forms of family polymorphism to be expressed in the calculus. The extension with nested sub- typing and composition is challenging\, for two different reasons. Firstly\, the subtyping relation that supports these features is non-trivial\, especially when it comes to obtaining an algorithmic version. Secondly\, the syntactic method used to prove coherence for previous calculi with disjoint intersection types is too inflexible\, making it hard to extend those calculi with new features (such as nested subtyping). We show how to address the first problem by adapting and extending the Barendregt\, Coppo and Dezani (BCD) subtyping rules for intersections with records and coercions. A sound and complete algorithmic system is obtained by using an approach inspired by Pierce’s work. To address the second problem we replace the syntactic method to prove coherence\, by a semantic proof method based on logical relations. Our work has been fully formalized in Coq\, and we have an implementation of our calculus.",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532156400000,
+      start: "Sat Jul 21 - 09:00",
+      end: "Sat Jul 21 - 10:30",
+      uid: "63e2f9a0-40d7-437d-8121-e03ecb29bf9a@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Keynotes",
+      summary: "Parser-Directed Test Generation - Andreas Zeller",
+      description: "Generating valid test inputs for a program is much easier if one knows the input language. In this talk\, I introduce and demonstrate techniques that given a program P without any input samples or models\, learns an input grammar that represents the syntactically valid inputs for P—a grammar which can then be used for highly effective test generation for P. To this end\, I introduce a test generator targeted at input parsers that systematically explores parsing alternatives based on dynamic tracking of constraints\; the resulting inputs and associated equivalence classes are then fed to an extended grammar learner whose resulting grammar can then be used for producing test cases. \nThe combination of grammar learning and grammar-based test generation opens the door towards fully automatic and comprehensive program testing\; within a few minutes\, our Pygmalion prototype can infer grammars and generate thousands of inputs for programs where random approaches such as AFL or symbolic approaches such as KLEE would take hours to days for. \nJoint work with Rahul Gopinath\, Björn Mathis\, Matthias Höschele\, and Alexander Kampmann. Will do live demos. Source code available.",
+      location: "ECOOP Keynote Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532161800000,
+      start: "Sat Jul 21 - 10:30",
+      end: "Sat Jul 21 - 11:00",
+      uid: "41b84491-7c9e-433a-b9de-2fc3b3c7ff15@conf.researchr.org",
+      track: "ECOOP 2018 Catering",
+      summary: "Coffee Break",
+      description: "",
+      location: "Coffee Break Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532163600000,
+      start: "Sat Jul 21 - 11:00",
+      end: "Sat Jul 21 - 11:25",
+      uid: "1bde99fa-c0db-4bf5-8540-f5d619c905af@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "Defensive Points-To Analysis",
+      description: "We present a defensive may-point-to analysis approach\, which offers soundness even in the presence of arbitrary opaque code",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532165100000,
+      start: "Sat Jul 21 - 11:25",
+      end: "Sat Jul 21 - 11:50",
+      uid: "25196a69-84a8-4ea0-8e38-7aab7ca58412@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "Legato",
+      description: "Modern software increasingly relies on external resources whose location or content can change during program execution. Examples of such resources include remote network hosts\, database entries\, dynamically updated configuration options\, etc. Long running\, adaptable programs must handle these changes gracefully and correctly. Dealing with all possible resource update scenarios is difficult to get right\, especially if\, as is common\, external resources can be modified without prior warning by code and/or users outside of the application’s direct control. If a resource unexpectedly changes during a computation\, an application may observe multiple\, inconsistent states of the resource\, leading to incorrect program behavior. \nThis paper presents a sound and precise static analysis\, Legato\, that verifies consistent access patterns for external resources. Our analysis ensures that every value computed by an application reflects a single\, consistent version of every external resource’s state. Although consistent computation in the presence of concurrent resource updates is fundamentally a concurrency issue\, our analysis relies on the novel at-most-once condition to avoid explicitly reasoning about concurrency. The at-most-once condition requires that all values depend on at most one access of each resource. Our analysis is flow-\, field-\, and context-sensitive. It scales to real-world Java programs while producing a moderate number of false positives. We applied Legato to 10 applications with dynamically updated configurations\, and found several non-trivial consistency bugs.",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532166600000,
+      start: "Sat Jul 21 - 11:50",
+      end: "Sat Jul 21 - 12:15",
+      uid: "78927317-b66b-4e6f-b2e1-236b1cc909f8@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "Definite Reference Mutability - Ana Milanova",
+      description: "Reference immutability type systems such as Javari and ReIm ensure that a given reference cannot be used to mutate the referenced object. These systems are conservative in the sense that a mutable references may not be truly mutable\, but mutable due to approximation. \nIn this paper\, we present ReM (for definite Re[ference] M[utability]). It separates potentially mutable references into (1) definitely mutable\, and (2) maybe mutable\, i.e.\, references whose mutability is due to inherent approximation. In addition\, we propose a CFL-reachability system for reference immutability\, and prove that it is equivalent to ReIm/ReM\, thus building a novel framework for reasoning about correctness of reference immutability type systems. We have implemented ReM and applied it on a large benchmark suite. Our results show that approximately 86.5% of all potentially mutable references are definitely mutable.",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     },{
+      when: 1532168100000,
+      start: "Sat Jul 21 - 12:15",
+      end: "Sat Jul 21 - 12:40",
+      uid: "61ef67b2-4146-4075-a933-1c2a1ccbdc4e@conf.researchr.org",
+      track: "ECOOP 2018 ECOOP Research Papers",
+      summary: "Efficient Reflection String Analysis via Graph Coloring - Neville Grech\, George Kastrinis\, Yannis Smaragdakis",
+      description: "Static analyses for reflection and other dynamic language features have recently increased in number and advanced in sophistication. Most such analyses rely on a whole-program model of the flow of strings\, through the stack and heap. We show that this global modeling of strings remains a major bottleneck of static analyses and propose a compact encoding\, in order to battle unnecessary complexity. In our encoding\, strings are maximally merged if they can never serve to differentiate class members in reflection operations. We formulate the problem as an instance of graph coloring and propose a fast polynomial-time algorithm that exploits the unique features of the setting (esp. large cliques\, leading to hundreds of colors for realistic programs). The encoding is applied to two different frameworks for string-guided Java reflection analysis from past literature and leads to significant optimization (e.g.\, a ∼ 2x reduction in the number of string-flow inferences)\, for a whole-program points-to analysis that uses strings.",
+      location: "ECOOP Room - Piet Heinkade 11, Amsterdam, Netherlands",
+     }]
+
+     events : Array<{
+      when: number,
+      start: string,
+      end: string,
+      track: string,
+      summary: string,
+      uid: string,
+      description: string,
+      location: string,
+    }> = []
+  }
+}
